@@ -128,15 +128,12 @@ def populate_xml(datatype, id, conn):
     if datatype == 'Project':
         populate_project(obj, ome, conn)
     
+    if datatype == 'Dataset':
+        populate_dataset(obj, ome, conn)
 
-    # test_ds, test_ds_ref = create_dataset_and_ref(id=666, name='test_dataset', description='test dataset')
-    # test_proj.dataset_ref.append(test_ds_ref)
-    # ome.datasets.append(test_ds)
-
-    # test_img, test_img_ref = create_image_and_ref(obj, id=420, name='this image')
-    # test_ds.image_ref.append(test_img_ref)
-    # ome.images.append(test_img)
-
+    if datatype == 'Image':
+        populate_image(obj, ome, conn)
+    
     print(ome)
     print(to_xml(ome))
     return
