@@ -193,7 +193,7 @@ def populate_roi(obj, roi_obj, ome, conn):
                 ome.structured_annotations.append(tag)
             roi.annotation_ref.append(ref)
         if ann.OMERO_TYPE == MapAnnotationI:
-            kv, ref = create_kv_and_ref(id=ann.getId(), value=Map(m=[M(k=_key, value=str(_value)) for _key, _value in ann.getMapValueAsMap().items()]))
+            kv, ref = create_kv_and_ref(id=ann.getId(), namespace=ann.getNs(), value=Map(m=[M(k=_key, value=str(_value)) for _key, _value in ann.getMapValueAsMap().items()]))
             # print(kv.value.m[0].k) # this is how you retrieve the key for the first kv pair in this annotation
             if kv not in ome.structured_annotations:
                 ome.structured_annotations.append(kv)
@@ -215,7 +215,7 @@ def populate_image(obj, ome, conn):
                 ome.structured_annotations.append(tag)
             img.annotation_ref.append(ref)
         if ann.OMERO_TYPE == MapAnnotationI:
-            kv, ref = create_kv_and_ref(id=ann.getId(), value=Map(m=[M(k=_key, value=str(_value)) for _key, _value in ann.getMapValueAsMap().items()]))
+            kv, ref = create_kv_and_ref(id=ann.getId(), namespace=ann.getNs(), value=Map(m=[M(k=_key, value=str(_value)) for _key, _value in ann.getMapValueAsMap().items()]))
             # print(kv.value.m[0].k) # this is how you retrieve the key for the first kv pair in this annotation
             if kv not in ome.structured_annotations:
                 ome.structured_annotations.append(kv)
@@ -244,7 +244,7 @@ def populate_dataset(obj, ome, conn):
                 ome.structured_annotations.append(tag)
             ds.annotation_ref.append(ref)
         if ann.OMERO_TYPE == MapAnnotationI:
-            kv, ref = create_kv_and_ref(id=ann.getId(), value=Map(m=[M(k=_key, value=str(_value)) for _key, _value in ann.getMapValueAsMap().items()]))
+            kv, ref = create_kv_and_ref(id=ann.getId(), namespace=ann.getNs(), value=Map(m=[M(k=_key, value=str(_value)) for _key, _value in ann.getMapValueAsMap().items()]))
             # print(kv.value.m[0].k) # this is how you retrieve the key for the first kv pair in this annotation
             if kv not in ome.structured_annotations:
                 ome.structured_annotations.append(kv)
@@ -270,7 +270,7 @@ def populate_project(obj, ome, conn):
                 ome.structured_annotations.append(tag)
             test_proj.annotation_ref.append(ref)
         if ann.OMERO_TYPE == MapAnnotationI:
-            kv, ref = create_kv_and_ref(id=ann.getId(), value=Map(m=[M(k=_key, value=str(_value)) for _key, _value in ann.getMapValueAsMap().items()]))
+            kv, ref = create_kv_and_ref(id=ann.getId(), namespace=ann.getNs(), value=Map(m=[M(k=_key, value=str(_value)) for _key, _value in ann.getMapValueAsMap().items()]))
             # print(kv.value.m[0].k) # this is how you retrieve the key for the first kv pair in this annotation
             if kv not in ome.structured_annotations:
                 ome.structured_annotations.append(kv)

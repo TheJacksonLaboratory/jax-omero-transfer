@@ -32,7 +32,7 @@ def create_annotations(ans, conn):
             ann_map[an.id] = tag_ann.getId()
         elif isinstance(an, MapAnnotation):
             map_ann = MapAnnotationWrapper(conn)
-            namespace = NSCLIENTMAPANNOTATION
+            namespace = an.namespace
             map_ann.setNs(namespace)
             key_value_data = []
             for v in an.value.m:
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('filepath',
                         type=str,
-                        help='filepath to save xml')
+                        help='filepath to load xml')
     args = parser.parse_args()
     image_map = {"Image:51":1405, "Image:52":1406, "Image:27423":1404}
     populate_omero(args.filepath, conn, image_map)
