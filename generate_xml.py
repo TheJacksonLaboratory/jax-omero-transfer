@@ -25,7 +25,7 @@ def create_pixels(obj):
     # we're assuming a single Pixels object per image
     pix_obj = obj.getPrimaryPixels()
     pixels=Pixels(
-        id='Pixels:0',
+        id=obj.getId(),
         dimension_order=pix_obj.getDimensionOrder().getValue(),
         size_c=pix_obj.getSizeC(),
         size_t=pix_obj.getSizeT(),
@@ -304,7 +304,7 @@ def populate_project(obj, ome, conn):
     ome.projects.append(test_proj)
 
 
-def populate_xml(datatype, id, conn):
+def populate_xml(datatype, id, filepath, conn):
     ome = OME()
     obj = conn.getObject(datatype, id)
     if datatype == 'Project':
@@ -315,13 +315,15 @@ def populate_xml(datatype, id, conn):
 
     if datatype == 'Image':
         populate_image(obj, ome, conn)
-    
+    with open(filepath, 'w') as fp:
+        print(to_xml(ome), file=fp)
+        fp.close()
     print(ome)
     print(to_xml(ome))
     return
 
 if __name__ == "__main__":
-    conn = ezomero.connect('root', 'omero', host='localhost', port=6064, group='system', secure=True)
+    conn = ezomero.connect('ratame', host='ctomerodev.jax.org', port=4064, group='default', secure=True)
     parser = argparse.ArgumentParser()
     parser.add_argument('datatype',
                         type=str,
@@ -329,7 +331,10 @@ if __name__ == "__main__":
     parser.add_argument('id',
                         type=int,
                         help='ID of the data to be moved')
+    parser.add_argument('filepath',
+                        type=str,
+                        help='filepath to save xml')
     args = parser.parse_args()
 
-    populate_xml(args.datatype, args.id, conn)
+    populate_xml(args.datatype, args.id, args.filepath, conn)
     conn.close()
