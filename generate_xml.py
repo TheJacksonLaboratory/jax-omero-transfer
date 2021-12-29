@@ -4,10 +4,10 @@ from ome_types.model import Dataset, DatasetRef
 from ome_types.model import Image, ImageRef, Pixels
 from ome_types.model import TagAnnotation, MapAnnotation, ROI
 from ome_types.model import AnnotationRef, ROIRef, Map
-from ome_types.model import Point, Line, Rectangle, Ellipse, Polygon, Polyline
+from ome_types.model import Point, Line, Rectangle, Ellipse, Polygon
 from ome_types.model.map import M
 from omero.model import TagAnnotationI, MapAnnotationI
-from omero.model import PointI, LineI, RectangleI, EllipseI, PolygonI, PolylineI
+from omero.model import PointI, LineI, RectangleI, EllipseI, PolygonI
 import ezomero
 import argparse
 
@@ -156,25 +156,6 @@ def create_polygon(shape):
     pol = Polygon(**args)
     return pol
 
-def create_polyline(shape):
-    args = {'id': shape.getId().val, 'points': shape.getPoints().val}
-    if shape.getTextValue() is not None:
-        args['text'] = shape.getTextValue().val
-    if shape.getTheC() is not None:
-        args['the_c'] = shape.getTheC().val
-    if shape.getTheZ() is not None:
-        args['the_z'] = shape.getTheZ().val
-    if shape.getTheT() is not None:
-        args['the_t'] = shape.getTheT().val
-    if shape.getFillColor() is not None:
-        args['fill_color'] = shape.getFillColor().val
-    if shape.getLocked() is not None:
-        args['locked'] = shape.getLocked().val
-    if shape.getStrokeColor() is not None:
-        args['stroke_color'] = shape.getStrokeColor().val
-    pline = Polyline(**args)
-    return pline
-
 def create_shapes(roi):
     shapes = []
     for s in roi.iterateShapes():
@@ -193,9 +174,6 @@ def create_shapes(roi):
         if isinstance(s, PolygonI):
             pol = create_polygon(s)
             shapes.append(pol)
-        if isinstance(s, PolylineI):
-            pline = create_polyline(s)
-            shapes.append(pline)
     return shapes
 
 def populate_roi(obj, roi_obj, ome, conn):
