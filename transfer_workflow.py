@@ -3,11 +3,26 @@ import argparse
 import ezomero
 import getpass
 import ome_types
+import os
+import pwd
+import grp
+import sys
+import subprocess
 from collections import defaultdict
-from os.path import join
 from pkg_resources import SOURCE_DIST
 from generate_xml import populate_xml
 from generate_omero_objects import populate_omero
+
+DIR_PERM = 0o755
+
+def demote(user_uid, user_gid, homedir):
+    def result():
+        os.setgid(user_gid)
+        os.setuid(user_uid)
+        os.environ["HOME"] = homedir
+    return result
+
+
 
 def get_source_connection(config):
     SOURCE_OMERO_USER = config['source_omero']['user']
@@ -45,6 +60,7 @@ def get_destination_connection(config):
                            group=DEST_OMERO_GROUP, secure=DEST_OMERO_SECURE)
     return destconn
 
+
 def list_source_files(xml_file, client_fps, managedrepo_dir, conn):
     # go through all images in XML, create list of filepaths.
     # return both a map between files and IDs and a simple list of files
@@ -58,7 +74,7 @@ def list_source_files(xml_file, client_fps, managedrepo_dir, conn):
         else:
             img_files = ezomero.get_original_filepaths(conn, img_id)
         for f in img_files:
-            f = str(join(managedrepo_dir, f))
+            f = str(os.path.join(managedrepo_dir, f))
             file_img_tuples.append((f, img_id))
             filelist.append(f)
     d = defaultdict(list)
@@ -68,13 +84,43 @@ def list_source_files(xml_file, client_fps, managedrepo_dir, conn):
     filelist = (list(set(filelist)))
     return d, filelist
 
-def copy_files(filelist, source_user, dest_user, dest_dir):
+def copy_files(filelist, source_user, source_host, dest_user, dest_group, dest_dir):
     # copy files between servers (scp?) using the correct users
-    return
+    # note that this flattens the dir structure, so if multiple source-side files
+    # have the same filename, this is a problem
+    source_user_uid = pwd.getpwnam(dest_user).pw_uid
+    data_user_gid = grp.getgrnam(dest_group).gr_gid
+    data_user_home = f"/home/{dest_user}"
+    os.makedirs(dest_dir, mode=DIR_PERM, exist_ok=True)
+    copycmd = ['scp', '-T', source_user+"@"+source_host+":"+" ".join(filelist),
+                dest_dir+"/"]
+    process = subprocess.Popen(copycmd,
+                            preexec_fn=demote(source_user_uid,
+                                                data_user_gid,
+                                                data_user_home),
+                            stdout=sys.stdout,
+                            stderr=sys.stderr
+                            )
+    process.communicate()
+    return 
 
-def import_files(dir, filelist, ln_s):
+def import_files(dir, filelist, ln_s, session, host, port):
     # import destination-side files as orphans
     # create a map between files and image IDs
+    for file in filelist:
+        dest_path = os.path.join(dir, os.path.basename(file))
+        if ln_s:
+            import_cmd = ['omero', 'import', '-k', session, '-s', host, '-p', str(port), 
+                          '--transfer', 'ln_s', str(dest_path)]
+        else:
+            import_cmd = ['omero', 'import', '-k', session, '-s', host, '-p', str(port), 
+                          str(dest_path)]
+        print(import_cmd)
+        process = subprocess.Popen(import_cmd,
+                            stdout=sys.stdout,
+                            stderr=sys.stderr
+                            )
+        process.communicate()
     return
 
 def make_image_map(source_map, dest_map):
@@ -87,6 +133,7 @@ def main(configfile):
     config = configparser.ConfigParser()
     config.read(configfile)
 
+    
     sourceconn = get_source_connection(config)
 
     SOURCE_DATA_TYPE = config['source_omero']['datatype']
@@ -94,7 +141,7 @@ def main(configfile):
     XML_FILEPATH = config['general']['xml_filepath']
     SOURCE_CLIENT_FPS = config['source_omero'].getboolean('use_client_filepaths', False)
     print("Populating xml...")
-    # populate_xml(SOURCE_DATA_TYPE, SOURCE_DATA_ID, XML_FILEPATH, sourceconn)
+    populate_xml(SOURCE_DATA_TYPE, SOURCE_DATA_ID, XML_FILEPATH, sourceconn)
     print(f"XML saved at {XML_FILEPATH}.")
 
     print("Listing source files...")
@@ -102,20 +149,26 @@ def main(configfile):
     src_file_id_map, filelist = list_source_files(XML_FILEPATH, SOURCE_CLIENT_FPS, MANAGED_REPO_DIR, sourceconn)
     sourceconn.close()
 
-    print("Starting file copy.")
+    print("Starting file copy...")
     SOURCE_USER = config['source_server']['user']
     DEST_USER = config['dest_server']['user']
+    DEST_GROUP = config['dest_server']['group']
     DEST_DIRECTORY = config['dest_server']['data_directory']
-    copy_files(filelist, SOURCE_USER, DEST_USER, DEST_DIRECTORY)
+    SOURCE_DATA_HOST = config['source_omero']['hostname']
+    copy_files(filelist, SOURCE_USER, SOURCE_DATA_HOST, DEST_USER, DEST_GROUP, DEST_DIRECTORY)
 
     print("Importing files...")
-    LN_S_IMPORT = config['general']['ln_s_import']
-    dest_file_id_map = import_files(DEST_DIRECTORY, filelist, LN_S_IMPORT)
+    destconn = get_destination_connection(config)
+    session = destconn.getSession().getUuid().val
+    LN_S_IMPORT = config['general'].getboolean('ln_s_import')
+    DEST_OMERO_HOST = config['dest_omero']['hostname']
+    DEST_OMERO_PORT = int(config['dest_omero']['port'])
+    dest_file_id_map = import_files(DEST_DIRECTORY, filelist, LN_S_IMPORT, session, DEST_OMERO_HOST, DEST_OMERO_PORT)
 
     img_map = make_image_map(src_file_id_map, dest_file_id_map)
     destconn = get_destination_connection(config)
     print("Creating and linking OMERO objects...")
-    #populate_omero(XML_FILEPATH, img_map, destconn)
+    populate_omero(XML_FILEPATH, img_map, destconn)
     destconn.close()
     
 
