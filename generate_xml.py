@@ -294,7 +294,7 @@ def populate_xml(datatype, id, filepath, conn):
     with open(filepath, 'w') as fp:
         print(to_xml(ome), file=fp)
         fp.close()
-    conn.close()
+    
     return
 
 
@@ -313,3 +313,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     conn = ezomero.connect()
     populate_xml(args.datatype, args.id, args.filepath, conn)
+    conn.close()

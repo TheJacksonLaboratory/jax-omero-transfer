@@ -2,6 +2,9 @@ import configparser
 import argparse
 import ezomero
 import getpass
+import ome_types
+from collections import defaultdict
+from os.path import join
 from pkg_resources import SOURCE_DIST
 from generate_xml import populate_xml
 from generate_omero_objects import populate_omero
@@ -42,10 +45,28 @@ def get_destination_connection(config):
                            group=DEST_OMERO_GROUP, secure=DEST_OMERO_SECURE)
     return destconn
 
-def list_source_files(datatype, data_id, client_fps, conn):
+def list_source_files(xml_file, client_fps, managedrepo_dir, conn):
     # go through all images in XML, create list of filepaths.
     # return both a map between files and IDs and a simple list of files
-    return None, None
+    filelist = []
+    file_img_tuples = []
+    ome = ome_types.from_xml(xml_file)
+    for img in ome.images:
+        img_id = int(img.id.split(':')[-1])
+        if client_fps:
+            img_files = ezomero.get_original_filepaths(conn, img_id, fpath='client')
+        else:
+            img_files = ezomero.get_original_filepaths(conn, img_id)
+        for f in img_files:
+            f = str(join(managedrepo_dir, f))
+            file_img_tuples.append((f, img_id))
+            filelist.append(f)
+    d = defaultdict(list)
+    for k, v in file_img_tuples:
+        d[k].append(v)
+    d = {x:sorted(d[x]) for x in d.keys()}
+    filelist = (list(set(filelist)))
+    return d, filelist
 
 def copy_files(filelist, source_user, dest_user, dest_dir):
     # copy files between servers (scp?) using the correct users
@@ -73,11 +94,12 @@ def main(configfile):
     XML_FILEPATH = config['general']['xml_filepath']
     SOURCE_CLIENT_FPS = config['source_omero'].getboolean('use_client_filepaths', False)
     print("Populating xml...")
-    populate_xml(SOURCE_DATA_TYPE, SOURCE_DATA_ID, XML_FILEPATH, sourceconn)
+    # populate_xml(SOURCE_DATA_TYPE, SOURCE_DATA_ID, XML_FILEPATH, sourceconn)
     print(f"XML saved at {XML_FILEPATH}.")
 
     print("Listing source files...")
-    src_file_id_map, filelist = list_source_files(SOURCE_DATA_TYPE, SOURCE_DATA_ID, SOURCE_CLIENT_FPS, sourceconn)
+    MANAGED_REPO_DIR = config['source_server']['managedrepo_dir']
+    src_file_id_map, filelist = list_source_files(XML_FILEPATH, SOURCE_CLIENT_FPS, MANAGED_REPO_DIR, sourceconn)
     sourceconn.close()
 
     print("Starting file copy.")
