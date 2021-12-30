@@ -153,7 +153,7 @@ def link_annotations(ome, proj_map, ds_map, img_map, ann_map, conn):
             img_obj.linkAnnotation(ann_obj)
     return
 
-def populate_omero(fp, conn, img_map):
+def populate_omero(fp, img_map, conn):
     ome = from_xml(fp)
     proj_map = create_projects(ome.projects, conn)
     print(proj_map)
@@ -165,8 +165,10 @@ def populate_omero(fp, conn, img_map):
     link_datasets(ome, proj_map, ds_map, conn)
     link_images(ome, ds_map, img_map, conn)
     link_annotations(ome, proj_map, ds_map, img_map, ann_map, conn)
-
+    conn.close()
     return
+
+
 
 if __name__ == "__main__":
     conn = ezomero.connect('root', 'omero', host='localhost', port=6064, group='system', secure=True)
@@ -176,5 +178,4 @@ if __name__ == "__main__":
                         help='filepath to load xml')
     args = parser.parse_args()
     image_map = {"Image:51":1405, "Image:52":1406, "Image:27423":1404}
-    populate_omero(args.filepath, conn, image_map)
-    conn.close()
+    populate_omero(args.filepath, image_map, conn)

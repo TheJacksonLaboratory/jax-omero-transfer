@@ -52,9 +52,7 @@ def create_kv_and_ref(**kwargs):
     return kv, kvref
 
 def create_roi_and_ref(**kwargs):
-    print('kwargs:', kwargs)
     roi = ROI(**kwargs)
-    print('roi:', roi)
     roiref = ROIRef(id=roi.id)
     return roi, roiref
 
@@ -296,12 +294,12 @@ def populate_xml(datatype, id, filepath, conn):
     with open(filepath, 'w') as fp:
         print(to_xml(ome), file=fp)
         fp.close()
-    print(ome)
-    print(to_xml(ome))
+    conn.close()
     return
 
+
 if __name__ == "__main__":
-    conn = ezomero.connect('ratame', host='ctomerodev.jax.org', port=4064, group='default', secure=True)
+    
     parser = argparse.ArgumentParser()
     parser.add_argument('datatype',
                         type=str,
@@ -313,6 +311,5 @@ if __name__ == "__main__":
                         type=str,
                         help='filepath to save xml')
     args = parser.parse_args()
-
+    conn = ezomero.connect()
     populate_xml(args.datatype, args.id, args.filepath, conn)
-    conn.close()
