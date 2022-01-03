@@ -54,4 +54,8 @@ Caveats/Issues
 - Is the image identification problem still an issue? 
 - How deep do we go graph-wise? 
 - Data reimport is still necessary on the destination, right? So anything generated at import time doesn’t need to be captured on the JSON file 
-- Is a reimport-less workflow even possible? 
+- Is a reimport-less workflow even possible?
+
+## Questions about ome-types approach
+- Do we need to map image IDs across servers or can the xml itself be used to manage the import?
+- Do we need to think differently about how to handle plates (e.g., Project/Dataset has no meaning for plate data)
