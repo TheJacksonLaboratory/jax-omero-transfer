@@ -129,7 +129,7 @@ def get_image_ids(file_path, destconn):
             params,
             destconn.SERVICE_OPTS
             )
-        image_ids = [r[0].val for r in results]
+        image_ids = sorted([r[0].val for r in results])
         return image_ids
 
 def import_files(dir, filelist, ln_s, destconn, host, port):
@@ -151,15 +151,32 @@ def import_files(dir, filelist, ln_s, destconn, host, port):
                             stderr=sys.stderr
                             )
         process.communicate()
-        img_ids = get_image_ids(file, destconn)
-        dest_map[file] = img_ids
+
+        img_ids = get_image_ids(dest_path, destconn)
+        dest_map[dest_path] = img_ids
     return dest_map
 
 def make_image_map(source_map, dest_map):
     # using both source and destination file-to-image-id maps,
     # map image IDs between source and destination
-    print(source_map, dest_map)
-    return
+    src_dict = defaultdict(list)
+    imgmap = {}
+    for k, v in source_map.items():
+        newkey = os.path.basename(k)
+        src_dict[newkey].extend(v)
+    dest_dict = defaultdict(list)
+    print(src_dict)
+    for k, v in dest_map.items():
+        newkey = os.path.basename(k)
+        dest_dict[newkey].extend(v)
+    print(dest_dict)
+    for src_k in src_dict.keys():
+        src_v = src_dict[src_k]
+        dest_v = dest_dict[src_k]
+        for count in range(len(src_v)):
+            map_key = f"Image:{src_v[count]}"
+            imgmap[map_key] = dest_v[count]
+    return imgmap
 
 
 def main(configfile):
@@ -196,7 +213,6 @@ def main(configfile):
     DEST_OMERO_HOST = config['dest_omero']['hostname']
     DEST_OMERO_PORT = int(config['dest_omero']['port'])
     dest_file_id_map = import_files(DEST_DIRECTORY, filelist, LN_S_IMPORT, destconn, DEST_OMERO_HOST, DEST_OMERO_PORT)
-
     img_map = make_image_map(src_file_id_map, dest_file_id_map)
     destconn = get_destination_connection(config)
     print("Creating and linking OMERO objects...")
