@@ -11,6 +11,8 @@ import subprocess
 from collections import defaultdict
 from pkg_resources import SOURCE_DIST
 from generate_xml import populate_xml
+from omero.sys import Parameters
+from omero.rtypes import rstring
 from generate_omero_objects import populate_omero
 
 DIR_PERM = 0o755
@@ -104,9 +106,37 @@ def copy_files(filelist, source_user, source_host, dest_user, dest_group, dest_d
     process.communicate()
     return 
 
-def import_files(dir, filelist, ln_s, session, host, port):
+def get_image_ids(file_path, destconn):
+        """Get the Ids of imported images.
+        Note that this will not find images if they have not been imported.
+        
+        Returns
+        -------
+        image_ids : list of ints
+            Ids of images imported from the specified client path, which
+            itself is derived from ``file_path``.
+        """
+        
+        q = destconn.getQueryService()
+        params = Parameters()
+        path_query = str(file_path).strip('/')
+        params.map = {"cpath": rstring(path_query)}
+        results = q.projection(
+            "SELECT i.id FROM Image i"
+            " JOIN i.fileset fs"
+            " JOIN fs.usedFiles u"
+            " WHERE u.clientPath=:cpath",
+            params,
+            destconn.SERVICE_OPTS
+            )
+        image_ids = [r[0].val for r in results]
+        return image_ids
+
+def import_files(dir, filelist, ln_s, destconn, host, port):
     # import destination-side files as orphans
     # create a map between files and image IDs
+    session = destconn.getSession().getUuid().val
+    dest_map = {}
     for file in filelist:
         dest_path = os.path.join(dir, os.path.basename(file))
         if ln_s:
@@ -121,11 +151,14 @@ def import_files(dir, filelist, ln_s, session, host, port):
                             stderr=sys.stderr
                             )
         process.communicate()
-    return
+        img_ids = get_image_ids(file, destconn)
+        dest_map[file] = img_ids
+    return dest_map
 
 def make_image_map(source_map, dest_map):
     # using both source and destination file-to-image-id maps,
     # map image IDs between source and destination
+    print(source_map, dest_map)
     return
 
 
@@ -159,11 +192,10 @@ def main(configfile):
 
     print("Importing files...")
     destconn = get_destination_connection(config)
-    session = destconn.getSession().getUuid().val
     LN_S_IMPORT = config['general'].getboolean('ln_s_import')
     DEST_OMERO_HOST = config['dest_omero']['hostname']
     DEST_OMERO_PORT = int(config['dest_omero']['port'])
-    dest_file_id_map = import_files(DEST_DIRECTORY, filelist, LN_S_IMPORT, session, DEST_OMERO_HOST, DEST_OMERO_PORT)
+    dest_file_id_map = import_files(DEST_DIRECTORY, filelist, LN_S_IMPORT, destconn, DEST_OMERO_HOST, DEST_OMERO_PORT)
 
     img_map = make_image_map(src_file_id_map, dest_file_id_map)
     destconn = get_destination_connection(config)
