@@ -172,6 +172,8 @@ def create_shapes(roi):
         if isinstance(s, PolygonI):
             pol = create_polygon(s)
             shapes.append(pol)
+        else:
+            continue
     return shapes
 
 def populate_roi(obj, roi_obj, ome, conn):

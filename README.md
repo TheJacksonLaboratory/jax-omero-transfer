@@ -1,10 +1,47 @@
 # jax-omero-transfer
 Transfer OMERO datsets from the Research server to the Public server.
 
+## What is this?
 
-# The Transfer Problem 
+This is a prototype Python project to transfer _something_ between two OMERO servers. It takes the following steps:
+- Constructs a XML document for the desired Project, Dataset or Image, specifiying all links between objects and annotations;
+- Lists all necessary image files that need to be transfered between servers to reproduce the desired items;
+- `rsync`s the files between the source server and your local machine (that is, hopefully, the destination server);
+- Imports the files destination-side as orphans;
+- Uses the generated XML to reproduce the links that existed originally.
 
- 
+## Requirements
+
+You need to have the python packages in `requirements.txt` installed, plus `rsync` installed at system level.
+
+## Recommended workflow
+
+We recommend running this prototype on your destination OMERO server. A simple `python transfer_workflow.py config.cfg` will do!
+
+## The config file
+
+You need to pass a config file to `transfer_workflow.py`. We provide an example with the repo. A quick explanation about the options there:
+
+1) [source_omero]: `hostname, port, group, user, password, secure` are all options for your connection to the OMERO server (`password` is optional - if you do not want to store it in plain text on the config file **(and you shouldn't)**, it will prompt you for a password when running it). `datatype` is one of Project, Dataset or Image (note the capitalization!), and `id` specifies the ID of the datatype to be transfered (so `Project` and `51` for these two options will transfer Project with ID 51 between servers). `use_client_filepaths` specifies whether to use client filepaths to retrieve the files from the source server.
+2) [dest_omero]: `hostname, port, group, user, password, secure` are all options for your connection to the OMERO server (`password` is optional - if you do not want to store it in plain text on the config file **(and you shouldn't)**, it will prompt you for a password when running it).
+3) [source_server]: `user` and `hostname` will be used to connect to the source server at filesystem-level to transfer files (note that storing THIS password in clear text here is not an option). `managedrepo_dir` is the full path to the `ManagedRepository` directory in this server, where we will find the original imported files.
+4) [dest_server]: `user` and `group` are the **local** users that will be used to store the data **locally**, and `data_directory` is where you are going to put the original image files locally. 
+5) [general]: `xml_filepath` is the path where you are going to store the XML describing all links between objects. `ln_s_import` is whether you want to import files using the `ln_s` option for in-place importing. Note that this option only works if you are running this on the destination server!
+
+## Caveats, warnings, limitations
+
+- Starting with the obvious: **this is a prototype, it is in development, and it has no warranties**. Use at your own risk. This has a lot of moving parts, interacting with multiple machines both at OMERO and filesystem level. It can break in thousands of different ways, and there is no easy way to thoroughly test it. We do not recommend using this if you are not proficient with Python, and a seasoned OMERO veteran. 
+- We do not know how to deal with Plates and Screens right now. Sorry.
+- ROIs are limited to `ezomero.rois` types (Point, Ellipse, Rectangle, Line, Polygon). All other ROIs will be skipped.
+- We assume Bioformats generates Image IDs in the same order for the same files (which is relevant for multi-series file formats), and that there aren't multiple files with the same filename inside the unit being transfered. 
+
+  \
+  \
+  \
+&nbsp;
+
+
+# Extra reading: The Transfer Problem 
 
 ## Scenario 1: “simple” solution for limited use cases 
 

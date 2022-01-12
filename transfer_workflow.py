@@ -9,7 +9,6 @@ import grp
 import sys
 import subprocess
 from collections import defaultdict
-from pkg_resources import SOURCE_DIST
 from generate_xml import populate_xml
 from omero.sys import Parameters
 from omero.rtypes import rstring
@@ -183,9 +182,7 @@ def main(configfile):
     config = configparser.ConfigParser()
     config.read(configfile)
 
-    
     sourceconn = get_source_connection(config)
-
     SOURCE_DATA_TYPE = config['source_omero']['datatype']
     SOURCE_DATA_ID = config['source_omero']['id']
     XML_FILEPATH = config['general']['xml_filepath']
@@ -209,7 +206,7 @@ def main(configfile):
 
     print("Importing files...")
     destconn = get_destination_connection(config)
-    LN_S_IMPORT = config['general'].getboolean('ln_s_import')
+    LN_S_IMPORT = config['general'].getboolean('ln_s_import', False)
     DEST_OMERO_HOST = config['dest_omero']['hostname']
     DEST_OMERO_PORT = int(config['dest_omero']['port'])
     dest_file_id_map = import_files(DEST_DIRECTORY, filelist, LN_S_IMPORT, destconn, DEST_OMERO_HOST, DEST_OMERO_PORT)
