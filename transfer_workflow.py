@@ -40,8 +40,8 @@ def get_source_connection(config):
                                      group=SOURCE_OMERO_GROUP,
                                      secure=SOURCE_OMERO_SECURE)
     else:
-        src_pass = getpass.getpass(f'Password for user {SOURCE_OMERO_USER} \
-                                   on server {SOURCE_OMERO_HOST}:')
+        src_pass = getpass.getpass(f'Password for user {SOURCE_OMERO_USER} '
+                                   f'on server {SOURCE_OMERO_HOST}:')
         sourceconn = ezomero.connect(SOURCE_OMERO_USER,
                                      src_pass,
                                      host=SOURCE_OMERO_HOST,
@@ -66,8 +66,8 @@ def get_destination_connection(config):
                                    group=DEST_OMERO_GROUP,
                                    secure=DEST_OMERO_SECURE)
     else:
-        dest_pass = getpass.getpass(f'Password for user {DEST_OMERO_USER} \
-                                    on server {DEST_OMERO_HOST}:')
+        dest_pass = getpass.getpass(f'Password for user {DEST_OMERO_USER} '
+                                    f'on server {DEST_OMERO_HOST}:')
         destconn = ezomero.connect(DEST_OMERO_USER,
                                    dest_pass,
                                    host=DEST_OMERO_HOST,
@@ -167,7 +167,8 @@ def import_files(filelist, destconn, config):
     session = destconn.getSession().getUuid().val
     dest_map = {}
     for file in filelist:
-        dest_path = os.path.join(dest_dir, file.split(managed_repo)[-1])
+        rel_path = file.split(managed_repo)[-1][1:]
+        dest_path = os.path.join(dest_dir, rel_path)
         if ln_s:
             import_cmd = ['omero', 'import', '-k', session, '-s',
                           host, '-p', str(port),

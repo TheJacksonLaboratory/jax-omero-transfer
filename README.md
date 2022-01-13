@@ -33,7 +33,7 @@ You need to pass a config file to `transfer_workflow.py`. We provide an example 
 - Starting with the obvious: **this is a prototype, it is in development, and it has no warranties**. Use at your own risk. This has a lot of moving parts, interacting with multiple machines both at OMERO and filesystem level. It can break in thousands of different ways, and there is no easy way to thoroughly test it. We do not recommend using this if you are not proficient with Python, and a seasoned OMERO veteran. 
 - We do not know how to deal with Plates and Screens right now. Sorry.
 - ROIs are limited to `ezomero.rois` types (Point, Ellipse, Rectangle, Line, Polygon). All other ROIs will be skipped.
-- We assume Bioformats generates Image IDs in the same order for the same files (which is relevant for multi-series file formats), and that there aren't multiple files with the same filename inside the unit being transfered. 
+- We assume Bioformats generates Image IDs in the same order for the same files (which is relevant for multi-series file formats).
 
   \
   \
