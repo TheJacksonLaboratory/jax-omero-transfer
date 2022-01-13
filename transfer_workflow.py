@@ -95,7 +95,7 @@ def list_source_files(config, conn):
         else:
             img_files = ezomero.get_original_filepaths(conn, img_id)
         for f in img_files:
-            f = str(os.path.join(managedrepo_dir, f))
+            f = str(os.path.join(managedrepo_dir,'.', f))
             file_img_tuples.append((f, img_id))
             filelist.append(f)
     d = defaultdict(list)
@@ -116,7 +116,7 @@ def copy_files(filelist, config):
     data_user_gid = grp.getgrnam(dest_group).gr_gid
     data_user_home = f"/home/{dest_user}"
     os.makedirs(dest_dir, mode=DIR_PERM, exist_ok=True)
-    copycmd = ['rsync', '-vh', '--progress',
+    copycmd = ['rsync', '-Rvh', '--progress',
                source_user+"@"+source_host+":"+" ".join(filelist),
                dest_dir+"/"]
     process = subprocess.Popen(copycmd,
@@ -163,10 +163,11 @@ def import_files(filelist, destconn, config):
     host = config['dest_omero']['hostname']
     port = int(config['dest_omero']['port'])
     dest_dir = config['dest_server']['data_directory']
+    managed_repo = config['source_server']['managedrepo_dir']
     session = destconn.getSession().getUuid().val
     dest_map = {}
     for file in filelist:
-        dest_path = os.path.join(dest_dir, os.path.basename(file))
+        dest_path = os.path.join(dest_dir, file.split(managed_repo)[-1])
         if ln_s:
             import_cmd = ['omero', 'import', '-k', session, '-s',
                           host, '-p', str(port),
