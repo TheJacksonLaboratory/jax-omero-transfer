@@ -11,20 +11,23 @@ from omero.model import PointI, LineI, RectangleI, EllipseI, PolygonI
 import ezomero
 import argparse
 
+
 def create_proj_and_ref(**kwargs):
     proj = Project(**kwargs)
     proj_ref = ProjectRef(id=proj.id)
     return proj, proj_ref
+
 
 def create_dataset_and_ref(**kwargs):
     ds = Dataset(**kwargs)
     ds_ref = DatasetRef(id=ds.id)
     return ds, ds_ref
 
+
 def create_pixels(obj):
     # we're assuming a single Pixels object per image
     pix_obj = obj.getPrimaryPixels()
-    pixels=Pixels(
+    pixels = Pixels(
         id=obj.getId(),
         dimension_order=pix_obj.getDimensionOrder().getValue(),
         size_c=pix_obj.getSizeC(),
@@ -36,28 +39,34 @@ def create_pixels(obj):
         metadata_only=True)
     return pixels
 
+
 def create_image_and_ref(**kwargs):
     img = Image(**kwargs)
     img_ref = ImageRef(id=img.id)
     return img, img_ref
+
 
 def create_tag_and_ref(**kwargs):
     tag = TagAnnotation(**kwargs)
     tagref = AnnotationRef(id=tag.id)
     return tag, tagref
 
+
 def create_kv_and_ref(**kwargs):
     kv = MapAnnotation(**kwargs)
     kvref = AnnotationRef(id=kv.id)
     return kv, kvref
+
 
 def create_roi_and_ref(**kwargs):
     roi = ROI(**kwargs)
     roiref = ROIRef(id=roi.id)
     return roi, roiref
 
+
 def create_point(shape):
-    args = {'id': shape.getId().val, 'x': shape.getX().val, 'y': shape.getY().val}
+    args = {'id': shape.getId().val, 'x': shape.getX().val,
+            'y': shape.getY().val}
     if shape.getTextValue() is not None:
         args['text'] = shape.getTextValue().val
     if shape.getTheC() is not None:
@@ -75,9 +84,11 @@ def create_point(shape):
     pt = Point(**args)
     return pt
 
+
 def create_line(shape):
-    args = {'id': shape.getId().val, 'x1': shape.getX1().val, 'y1': shape.getY1().val,
-            'x2': shape.getX2().val, 'y2': shape.getY2().val}
+    args = {'id': shape.getId().val, 'x1': shape.getX1().val,
+            'y1': shape.getY1().val, 'x2': shape.getX2().val,
+            'y2': shape.getY2().val}
     if shape.getTextValue() is not None:
         args['text'] = shape.getTextValue().val
     if shape.getTheC() is not None:
@@ -95,9 +106,11 @@ def create_line(shape):
     ln = Line(**args)
     return ln
 
+
 def create_rectangle(shape):
-    args = {'id': shape.getId().val, 'x': shape.getX().val, 'y': shape.getY().val,
-            'height': shape.getHeight().val, 'width': shape.getWidth().val}
+    args = {'id': shape.getId().val, 'x': shape.getX().val,
+            'y': shape.getY().val, 'height': shape.getHeight().val,
+            'width': shape.getWidth().val}
     if shape.getTextValue() is not None:
         args['text'] = shape.getTextValue().val
     if shape.getTheC() is not None:
@@ -115,9 +128,11 @@ def create_rectangle(shape):
     rec = Rectangle(**args)
     return rec
 
+
 def create_ellipse(shape):
-    args = {'id': shape.getId().val, 'x': shape.getX().val, 'y': shape.getY().val,
-            'radius_x': shape.getRadiusX().val, 'radius_y': shape.getRadiusY().val}
+    args = {'id': shape.getId().val, 'x': shape.getX().val,
+            'y': shape.getY().val, 'radius_x': shape.getRadiusX().val,
+            'radius_y': shape.getRadiusY().val}
     if shape.getTextValue() is not None:
         args['text'] = shape.getTextValue().val
     if shape.getTheC() is not None:
@@ -134,6 +149,7 @@ def create_ellipse(shape):
         args['stroke_color'] = shape.getStrokeColor().val
     ell = Ellipse(**args)
     return ell
+
 
 def create_polygon(shape):
     args = {'id': shape.getId().val, 'points': shape.getPoints().val}
@@ -154,6 +170,7 @@ def create_polygon(shape):
     pol = Polygon(**args)
     return pol
 
+
 def create_shapes(roi):
     shapes = []
     for s in roi.iterateShapes():
@@ -161,8 +178,8 @@ def create_shapes(roi):
             p = create_point(s)
             shapes.append(p)
         if isinstance(s, LineI):
-            l = create_line(s)
-            shapes.append(l)
+            line = create_line(s)
+            shapes.append(line)
         if isinstance(s, RectangleI):
             r = create_rectangle(s)
             shapes.append(r)
@@ -176,6 +193,7 @@ def create_shapes(roi):
             continue
     return shapes
 
+
 def populate_roi(obj, roi_obj, ome, conn):
     id = obj.getId().getValue()
     name = obj.getName()
@@ -185,16 +203,22 @@ def populate_roi(obj, roi_obj, ome, conn):
     if desc is not None:
         desc = desc.getValue()
     shapes = create_shapes(obj)
-    roi, roi_ref = create_roi_and_ref(id=id, name=name, description=desc, union=shapes)
+    roi, roi_ref = create_roi_and_ref(id=id, name=name, description=desc,
+                                      union=shapes)
     for ann in roi_obj.listAnnotations():
         if ann.OMERO_TYPE == TagAnnotationI:
-            tag, ref = create_tag_and_ref(id=ann.getId(), value=ann.getTextValue())
+            tag, ref = create_tag_and_ref(id=ann.getId(),
+                                          value=ann.getTextValue())
             if tag not in ome.structured_annotations:
                 ome.structured_annotations.append(tag)
             roi.annotation_ref.append(ref)
         if ann.OMERO_TYPE == MapAnnotationI:
-            kv, ref = create_kv_and_ref(id=ann.getId(), namespace=ann.getNs(), value=Map(m=[M(k=_key, value=str(_value)) for _key, _value in ann.getMapValueAsMap().items()]))
-            # print(kv.value.m[0].k) # this is how you retrieve the key for the first kv pair in this annotation
+            kv, ref = create_kv_and_ref(id=ann.getId(),
+                                        namespace=ann.getNs(),
+                                        value=Map(
+                                        m=[M(k=_key, value=str(_value))
+                                           for _key, _value in
+                                           ann.getMapValueAsMap().items()]))
             if kv not in ome.structured_annotations:
                 ome.structured_annotations.append(kv)
             roi.annotation_ref.append(ref)
@@ -202,21 +226,28 @@ def populate_roi(obj, roi_obj, ome, conn):
         ome.rois.append(roi)
     return roi_ref
 
+
 def populate_image(obj, ome, conn):
     id = obj.getId()
     name = obj.getName()
     desc = obj.getDescription()
     pix = create_pixels(obj)
-    img, img_ref = create_image_and_ref(id=id, name=name, description=desc, pixels=pix)
+    img, img_ref = create_image_and_ref(id=id, name=name,
+                                        description=desc, pixels=pix)
     for ann in obj.listAnnotations():
         if ann.OMERO_TYPE == TagAnnotationI:
-            tag, ref = create_tag_and_ref(id=ann.getId(), value=ann.getTextValue())
+            tag, ref = create_tag_and_ref(id=ann.getId(),
+                                          value=ann.getTextValue())
             if tag not in ome.structured_annotations:
                 ome.structured_annotations.append(tag)
             img.annotation_ref.append(ref)
         if ann.OMERO_TYPE == MapAnnotationI:
-            kv, ref = create_kv_and_ref(id=ann.getId(), namespace=ann.getNs(), value=Map(m=[M(k=_key, value=str(_value)) for _key, _value in ann.getMapValueAsMap().items()]))
-            # print(kv.value.m[0].k) # this is how you retrieve the key for the first kv pair in this annotation
+            kv, ref = create_kv_and_ref(id=ann.getId(),
+                                        namespace=ann.getNs(),
+                                        value=Map(
+                                        m=[M(k=_key, value=str(_value))
+                                           for _key, _value in
+                                           ann.getMapValueAsMap().items()]))
             if kv not in ome.structured_annotations:
                 ome.structured_annotations.append(kv)
             img.annotation_ref.append(ref)
@@ -226,7 +257,6 @@ def populate_image(obj, ome, conn):
         roi_obj = conn.getObject('Roi', roi.getId().getValue())
         roi_ref = populate_roi(roi, roi_obj, ome, conn)
         img.roi_ref.append(roi_ref)
-            
     if img not in ome.images:
         ome.images.append(img)
     return img_ref
@@ -236,16 +266,22 @@ def populate_dataset(obj, ome, conn):
     id = obj.getId()
     name = obj.getName()
     desc = obj.getDescription()
-    ds, ds_ref = create_dataset_and_ref(id=id, name=name, description=desc)
+    ds, ds_ref = create_dataset_and_ref(id=id, name=name,
+                                        description=desc)
     for ann in obj.listAnnotations():
         if ann.OMERO_TYPE == TagAnnotationI:
-            tag, ref = create_tag_and_ref(id=ann.getId(), value=ann.getTextValue())
+            tag, ref = create_tag_and_ref(id=ann.getId(),
+                                          value=ann.getTextValue())
             if tag not in ome.structured_annotations:
                 ome.structured_annotations.append(tag)
             ds.annotation_ref.append(ref)
         if ann.OMERO_TYPE == MapAnnotationI:
-            kv, ref = create_kv_and_ref(id=ann.getId(), namespace=ann.getNs(), value=Map(m=[M(k=_key, value=str(_value)) for _key, _value in ann.getMapValueAsMap().items()]))
-            # print(kv.value.m[0].k) # this is how you retrieve the key for the first kv pair in this annotation
+            kv, ref = create_kv_and_ref(id=ann.getId(),
+                                        namespace=ann.getNs(),
+                                        value=Map(
+                                        m=[M(k=_key, value=str(_value))
+                                           for _key, _value in
+                                           ann.getMapValueAsMap().items()]))
             if kv not in ome.structured_annotations:
                 ome.structured_annotations.append(kv)
             ds.annotation_ref.append(ref)
@@ -265,13 +301,18 @@ def populate_project(obj, ome, conn):
     test_proj, _ = create_proj_and_ref(id=id, name=name, description=desc)
     for ann in obj.listAnnotations():
         if ann.OMERO_TYPE == TagAnnotationI:
-            tag, ref = create_tag_and_ref(id=ann.getId(), value=ann.getTextValue())
+            tag, ref = create_tag_and_ref(id=ann.getId(),
+                                          value=ann.getTextValue())
             if tag not in ome.structured_annotations:
                 ome.structured_annotations.append(tag)
             test_proj.annotation_ref.append(ref)
         if ann.OMERO_TYPE == MapAnnotationI:
-            kv, ref = create_kv_and_ref(id=ann.getId(), namespace=ann.getNs(), value=Map(m=[M(k=_key, value=str(_value)) for _key, _value in ann.getMapValueAsMap().items()]))
-            # print(kv.value.m[0].k) # this is how you retrieve the key for the first kv pair in this annotation
+            kv, ref = create_kv_and_ref(id=ann.getId(),
+                                        namespace=ann.getNs(),
+                                        value=Map(
+                                        m=[M(k=_key, value=str(_value))
+                                           for _key, _value in
+                                           ann.getMapValueAsMap().items()]))
             if kv not in ome.structured_annotations:
                 ome.structured_annotations.append(kv)
             test_proj.annotation_ref.append(ref)
@@ -287,25 +328,22 @@ def populate_xml(datatype, id, filepath, conn):
     obj = conn.getObject(datatype, id)
     if datatype == 'Project':
         populate_project(obj, ome, conn)
-    
     if datatype == 'Dataset':
         populate_dataset(obj, ome, conn)
-
     if datatype == 'Image':
         populate_image(obj, ome, conn)
     with open(filepath, 'w') as fp:
         print(to_xml(ome), file=fp)
         fp.close()
-    
     return
 
 
 if __name__ == "__main__":
-    
     parser = argparse.ArgumentParser()
     parser.add_argument('datatype',
                         type=str,
-                        help='Type of data (project, dataset, image) to be moved')
+                        help='Type of data (project, dataset, image)'
+                             ' to be moved')
     parser.add_argument('id',
                         type=int,
                         help='ID of the data to be moved')

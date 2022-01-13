@@ -4,25 +4,27 @@ from ome_types import from_xml
 from ome_types.model import TagAnnotation, MapAnnotation
 from ome_types.model import Line, Point, Rectangle, Ellipse, Polygon, Polyline
 from omero.gateway import TagAnnotationWrapper, MapAnnotationWrapper
-from omero.constants.metadata import NSCLIENTMAPANNOTATION
 from ezomero import rois
 
+
 def create_projects(pjs, conn):
-    pj_map={}
+    pj_map = {}
     for pj in pjs:
         pj_id = ezomero.post_project(conn, pj.name, pj.description)
         pj_map[pj.id] = pj_id
     return pj_map
 
+
 def create_datasets(dss, conn):
-    ds_map={}
+    ds_map = {}
     for ds in dss:
         ds_id = ezomero.post_dataset(conn, ds.name, ds.description)
         ds_map[ds.id] = ds_id
     return ds_map
 
+
 def create_annotations(ans, conn):
-    ann_map={}
+    ann_map = {}
     for an in ans:
         if isinstance(an, TagAnnotation):
             tag_ann = TagAnnotationWrapper(conn)
@@ -42,26 +44,36 @@ def create_annotations(ans, conn):
             ann_map[an.id] = map_ann.getId()
     return ann_map
 
+
 def create_shapes(roi):
     shapes = []
     for shape in roi.union:
         if isinstance(shape, Point):
-            sh = rois.Point(shape.x, shape.y, z=shape.the_z, c=shape.the_c, t=shape.the_t, label=shape.text)
+            sh = rois.Point(shape.x, shape.y, z=shape.the_z, c=shape.the_c,
+                            t=shape.the_t, label=shape.text)
         elif isinstance(shape, Line):
-            sh = rois.Line(shape.x1, shape.y1, shape.x2, shape.y2, z=shape.the_z, c=shape.the_c, t=shape.the_t, label=shape.text)
+            sh = rois.Line(shape.x1, shape.y1, shape.x2, shape.y2,
+                           z=shape.the_z, c=shape.the_c, t=shape.the_t,
+                           label=shape.text)
         elif isinstance(shape, Rectangle):
-            sh = rois.Rectangle(shape.x, shape.y, shape.width, shape.height, z=shape.the_z, c=shape.the_c, t=shape.the_t, label=shape.text)
+            sh = rois.Rectangle(shape.x, shape.y, shape.width, shape.height,
+                                z=shape.the_z, c=shape.the_c, t=shape.the_t,
+                                label=shape.text)
         elif isinstance(shape, Ellipse):
-            sh = rois.Ellipse(shape.x, shape.y, shape.radius_x, shape.radius_y, z=shape.the_z, c=shape.the_c, t=shape.the_t, label=shape.text)
+            sh = rois.Ellipse(shape.x, shape.y, shape.radius_x, shape.radius_y,
+                              z=shape.the_z, c=shape.the_c, t=shape.the_t,
+                              label=shape.text)
         elif isinstance(shape, Polygon) or isinstance(shape, Polyline):
             points = []
             for pt in shape.points.split(" "):
                 points.append(tuple(float(x) for x in pt.split(",")))
-            sh = rois.Polygon(points, z=shape.the_z, c=shape.the_c, t=shape.the_t, label=shape.text)
+            sh = rois.Polygon(points, z=shape.the_z, c=shape.the_c,
+                              t=shape.the_t, label=shape.text)
         else:
             continue
         shapes.append(sh)
     return shapes
+
 
 def _int_to_rgba(omero_val):
     """ Helper function returning the color as an Integer in RGBA encoding """
@@ -74,6 +86,7 @@ def _int_to_rgba(omero_val):
     a = a / 256.0
     return (r, g, b, a)
 
+
 def create_rois(rois, imgs, img_map, conn):
     for img in imgs:
         for roiref in img.roi_ref:
@@ -83,10 +96,11 @@ def create_rois(rois, imgs, img_map, conn):
             # using colors for the first shape
             fill_color = _int_to_rgba(int(roi.union[0].fill_color))
             stroke_color = _int_to_rgba(int(roi.union[0].stroke_color))
-            ezomero.post_roi(conn, img_id_dest, shapes, name=roi.name, description=roi.description,
+            ezomero.post_roi(conn, img_id_dest, shapes, name=roi.name,
+                             description=roi.description,
                              fill_color=fill_color, stroke_color=stroke_color)
-
     return
+
 
 def link_datasets(ome, proj_map, ds_map, conn):
     for proj in ome.projects:
@@ -98,6 +112,7 @@ def link_datasets(ome, proj_map, ds_map, conn):
         ezomero.link_datasets_to_project(conn, ds_ids, proj_id)
     return
 
+
 def link_images(ome, ds_map, img_map, conn):
     for ds in ome.datasets:
         ds_id = ds_map[ds.id]
@@ -107,6 +122,7 @@ def link_images(ome, ds_map, img_map, conn):
             img_ids.append(img_id)
         ezomero.link_images_to_dataset(conn, img_ids, ds_id)
     return
+
 
 def link_annotations(ome, proj_map, ds_map, img_map, ann_map, conn):
     for proj in ome.projects:
@@ -134,7 +150,7 @@ def link_annotations(ome, proj_map, ds_map, img_map, ann_map, conn):
                 ann_obj = conn.getObject("TagAnnotation", ann_id)
             elif isinstance(ann, MapAnnotation):
                 ann_obj = conn.getObject("MapAnnotation", ann_id)
-            else: 
+            else:
                 continue
             ds_obj.linkAnnotation(ann_obj)
     for img in ome.images:
@@ -153,6 +169,7 @@ def link_annotations(ome, proj_map, ds_map, img_map, ann_map, conn):
             img_obj.linkAnnotation(ann_obj)
     return
 
+
 def populate_omero(fp, img_map, conn):
     ome = from_xml(fp)
     proj_map = create_projects(ome.projects, conn)
@@ -169,13 +186,13 @@ def populate_omero(fp, img_map, conn):
     return
 
 
-
 if __name__ == "__main__":
-    conn = ezomero.connect('root', 'omero', host='localhost', port=6064, group='system', secure=True)
+    conn = ezomero.connect('root', 'omero', host='localhost',
+                           port=6064, group='system', secure=True)
     parser = argparse.ArgumentParser()
     parser.add_argument('filepath',
                         type=str,
                         help='filepath to load xml')
     args = parser.parse_args()
-    image_map = {"Image:51":1405, "Image:52":1406, "Image:27423":1404}
+    image_map = {"Image:51": 1405, "Image:52": 1406, "Image:27423": 1404}
     populate_omero(args.filepath, image_map, conn)
