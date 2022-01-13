@@ -16,7 +16,7 @@ You need to have the python packages in `requirements.txt` installed, plus `rsyn
 
 ## Recommended workflow
 
-We recommend running this prototype on your destination OMERO server. A simple `python transfer_workflow.py config.cfg` will do!
+We recommend running this prototype on your destination OMERO server. A simple `python transfer_workflow.py config.cfg` will do! Note that if the local user you are using to store the data requires you to have elevated privileges to switch to, you will need to `sudo`-run this.
 
 ## The config file
 
