@@ -100,7 +100,7 @@ def create_line(shape):
     if shape.getTextValue() is not None:
         args['text'] = shape.getTextValue().val
     if shape.getTheC() is not None:
-        args['the_c'] = shape.getTheC().val
+        args['the_c'] = max(shape.getTheC().val, 0)
     if shape.getTheZ() is not None:
         args['the_z'] = shape.getTheZ().val
     if shape.getTheT() is not None:
