@@ -74,7 +74,7 @@ def create_point(shape):
     if shape.getTextValue() is not None:
         args['text'] = shape.getTextValue().val
     if shape.getTheC() is not None:
-        args['the_c'] = shape.getTheC().val
+        args['the_c'] = max(shape.getTheC().val, 0)
     if shape.getTheZ() is not None:
         args['the_z'] = shape.getTheZ().val
     if shape.getTheT() is not None:
@@ -111,7 +111,6 @@ def create_line(shape):
         args['locked'] = shape.getLocked().val
     if shape.getStrokeColor() is not None:
         args['stroke_color'] = shape.getStrokeColor().val
-    print(args)
     ln = Line(**args)
     return ln
 
@@ -127,7 +126,7 @@ def create_rectangle(shape):
     if shape.getTextValue() is not None:
         args['text'] = shape.getTextValue().val
     if shape.getTheC() is not None:
-        args['the_c'] = shape.getTheC().val
+        args['the_c'] = max(shape.getTheC().val, 0)
     if shape.getTheZ() is not None:
         args['the_z'] = shape.getTheZ().val
     if shape.getTheT() is not None:
@@ -153,7 +152,7 @@ def create_ellipse(shape):
     if shape.getTextValue() is not None:
         args['text'] = shape.getTextValue().val
     if shape.getTheC() is not None:
-        args['the_c'] = shape.getTheC().val
+        args['the_c'] = max(shape.getTheC().val, 0)
     if shape.getTheZ() is not None:
         args['the_z'] = shape.getTheZ().val
     if shape.getTheT() is not None:
@@ -177,7 +176,7 @@ def create_polygon(shape):
     if shape.getTextValue() is not None:
         args['text'] = shape.getTextValue().val
     if shape.getTheC() is not None:
-        args['the_c'] = shape.getTheC().val
+        args['the_c'] = max(shape.getTheC().val, 0)
     if shape.getTheZ() is not None:
         args['the_z'] = shape.getTheZ().val
     if shape.getTheT() is not None:

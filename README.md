@@ -34,6 +34,7 @@ You need to pass a config file to `transfer_workflow.py`. We provide an example 
 - We do not know how to deal with Plates and Screens right now. Sorry.
 - ROIs are limited to `ezomero.rois` types (Point, Ellipse, Rectangle, Line, Polygon). All other ROIs will be skipped.
 - We assume Bioformats generates Image IDs in the same order for the same files (which is relevant for multi-series file formats).
+- OMERO does some strange setting with channel = -1 for ROIs sometimes (for RGB images, I think).  `ome-types` hates that, so we set those values to 0.
 
   \
   \
