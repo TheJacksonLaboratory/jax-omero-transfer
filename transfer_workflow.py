@@ -42,7 +42,7 @@ def get_source_connection(config):
                                      secure=SOURCE_OMERO_SECURE)
     else:
         src_pass = getpass.getpass(f'Password for user {SOURCE_OMERO_USER} '
-                                   f'on server {SOURCE_OMERO_HOST}:')
+                                   f'on OMERO server {SOURCE_OMERO_HOST}:')
         sourceconn = ezomero.connect(SOURCE_OMERO_USER,
                                      src_pass,
                                      host=SOURCE_OMERO_HOST,
@@ -68,7 +68,7 @@ def get_destination_connection(config):
                                    secure=DEST_OMERO_SECURE)
     else:
         dest_pass = getpass.getpass(f'Password for user {DEST_OMERO_USER} '
-                                    f'on server {DEST_OMERO_HOST}:')
+                                    f'on OMERO server {DEST_OMERO_HOST}:')
         destconn = ezomero.connect(DEST_OMERO_USER,
                                    dest_pass,
                                    host=DEST_OMERO_HOST,

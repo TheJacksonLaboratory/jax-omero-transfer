@@ -76,11 +76,9 @@ def create_shapes(roi):
                               label=shape.text)
         elif isinstance(shape, Polygon) or isinstance(shape, Polyline):
             points = []
-            print(shape.points)
             for pt in shape.points.split(" "):
-                print(pt)
+                pt = pt.rstrip(",")
                 points.append(tuple(float(x) for x in pt.split(",")))
-            print(points)
             sh = rois.Polygon(points, z=shape.the_z, c=shape.the_c,
                               t=shape.the_t, label=shape.text)
         else:
