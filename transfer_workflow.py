@@ -117,21 +117,15 @@ def copy_files(filelist, config):
     print(data_user_uid, data_user_gid)
     data_user_home = f"/home/{dest_user}"
     #os.makedirs(dest_dir, mode=DIR_PERM, exist_ok=True)
-    mkdircmd = ['mkdir', '-m', str(DIR_PERM), '-p', dest_dir]
+    mkdircmd = ['sudo', '-u', 'dest_user', 'mkdir', '-m', str(DIR_PERM), '-p', dest_dir]
     process = subprocess.Popen(mkdircmd,
-                               preexec_fn=demote(data_user_uid,
-                                                 data_user_gid,
-                                                 data_user_home),
                                stdout=sys.stdout,
                                stderr=sys.stderr
                                )
-    copycmd = ['rsync', '-Rvh', '--progress',
+    copycmd = ['sudo', '-u', 'dest_user', 'rsync', '-Rvh', '--progress',
                source_user+"@"+source_host+":"+" ".join(filelist),
                dest_dir+"/"]
     process = subprocess.Popen(copycmd,
-                               preexec_fn=demote(data_user_uid,
-                                                 data_user_gid,
-                                                 data_user_home),
                                stdout=sys.stdout,
                                stderr=sys.stderr
                                )
