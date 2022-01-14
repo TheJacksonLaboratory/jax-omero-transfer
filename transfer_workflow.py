@@ -116,7 +116,7 @@ def copy_files(filelist, config):
     data_user_gid = grp.getgrnam(dest_group).gr_gid
     data_user_home = f"/home/{dest_user}"
     #os.makedirs(dest_dir, mode=DIR_PERM, exist_ok=True)
-    mkdircmd = ['mkdir', '-p', '-m', DIR_PERM, dest_dir]
+    mkdircmd = ['mkdir', '-m', DIR_PERM, '-p', dest_dir]
     process = subprocess.Popen(mkdircmd,
                                preexec_fn=demote(source_user_uid,
                                                  data_user_gid,
