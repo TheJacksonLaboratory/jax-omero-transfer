@@ -265,6 +265,9 @@ def populate_image(obj, ome, conn):
             mmap = [M(k=_key, value=str(_value))
                       for _key, _value in
                       ann.getMapValueAsMap().items()]
+            for m in mmap:
+                if m['value'] == '':
+                    m['value'] = ' '
             print(mmap[0])
             kv, ref = create_kv_and_ref(id=ann.getId(),
                                         namespace=ann.getNs(),
