@@ -111,6 +111,7 @@ def create_line(shape):
         args['locked'] = shape.getLocked().val
     if shape.getStrokeColor() is not None:
         args['stroke_color'] = shape.getStrokeColor().val
+    print(args)
     ln = Line(**args)
     return ln
 
