@@ -112,13 +112,14 @@ def copy_files(filelist, config):
     dest_group = config['dest_server']['group']
     dest_dir = config['dest_server']['data_directory']
     source_host = config['source_omero']['hostname']
-    source_user_uid = pwd.getpwnam(dest_user).pw_uid
+    data_user_uid = pwd.getpwnam(dest_user).pw_uid
     data_user_gid = grp.getgrnam(dest_group).gr_gid
+    print(data_user_uid, data_user_gid)
     data_user_home = f"/home/{dest_user}"
     #os.makedirs(dest_dir, mode=DIR_PERM, exist_ok=True)
     mkdircmd = ['mkdir', '-m', str(DIR_PERM), '-p', dest_dir]
     process = subprocess.Popen(mkdircmd,
-                               preexec_fn=demote(source_user_uid,
+                               preexec_fn=demote(data_user_uid,
                                                  data_user_gid,
                                                  data_user_home),
                                stdout=sys.stdout,
@@ -128,7 +129,7 @@ def copy_files(filelist, config):
                source_user+"@"+source_host+":"+" ".join(filelist),
                dest_dir+"/"]
     process = subprocess.Popen(copycmd,
-                               preexec_fn=demote(source_user_uid,
+                               preexec_fn=demote(data_user_uid,
                                                  data_user_gid,
                                                  data_user_home),
                                stdout=sys.stdout,
