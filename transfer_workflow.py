@@ -14,7 +14,8 @@ from omero.sys import Parameters
 from omero.rtypes import rstring
 from generate_omero_objects import populate_omero
 
-DIR_PERM = 0o755
+#DIR_PERM = 0o755
+DIR_PERM = 755
 
 
 def demote(user_uid, user_gid, homedir):
