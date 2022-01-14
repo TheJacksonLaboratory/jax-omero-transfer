@@ -115,7 +115,15 @@ def copy_files(filelist, config):
     source_user_uid = pwd.getpwnam(dest_user).pw_uid
     data_user_gid = grp.getgrnam(dest_group).gr_gid
     data_user_home = f"/home/{dest_user}"
-    os.makedirs(dest_dir, mode=DIR_PERM, exist_ok=True)
+    #os.makedirs(dest_dir, mode=DIR_PERM, exist_ok=True)
+    mkdircmd = ['mkdir', '-p', '-m', DIR_PERM, dest_dir]
+    process = subprocess.Popen(mkdircmd,
+                               preexec_fn=demote(source_user_uid,
+                                                 data_user_gid,
+                                                 data_user_home),
+                               stdout=sys.stdout,
+                               stderr=sys.stderr
+                               )
     copycmd = ['rsync', '-Rvh', '--progress',
                source_user+"@"+source_host+":"+" ".join(filelist),
                dest_dir+"/"]

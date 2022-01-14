@@ -233,12 +233,16 @@ def populate_roi(obj, roi_obj, ome, conn):
                 ome.structured_annotations.append(tag)
             roi.annotation_ref.append(ref)
         if ann.OMERO_TYPE == MapAnnotationI:
+            mmap = [M(k=_key, value=str(_value))
+                      for _key, _value in
+                      ann.getMapValueAsMap().items()]
+            for m in mmap:
+                if m.value == '':
+                    m.value = ' '
             kv, ref = create_kv_and_ref(id=ann.getId(),
                                         namespace=ann.getNs(),
                                         value=Map(
-                                        m=[M(k=_key, value=str(_value))
-                                           for _key, _value in
-                                           ann.getMapValueAsMap().items()]))
+                                        m=mmap))
             if kv not in ome.structured_annotations:
                 ome.structured_annotations.append(kv)
             roi.annotation_ref.append(ref)
@@ -268,7 +272,6 @@ def populate_image(obj, ome, conn):
             for m in mmap:
                 if m.value == '':
                     m.value = ' '
-            print(mmap[0])
             kv, ref = create_kv_and_ref(id=ann.getId(),
                                         namespace=ann.getNs(),
                                         value=Map(
@@ -301,12 +304,16 @@ def populate_dataset(obj, ome, conn):
                 ome.structured_annotations.append(tag)
             ds.annotation_ref.append(ref)
         if ann.OMERO_TYPE == MapAnnotationI:
+            mmap = [M(k=_key, value=str(_value))
+                      for _key, _value in
+                      ann.getMapValueAsMap().items()]
+            for m in mmap:
+                if m.value == '':
+                    m.value = ' '
             kv, ref = create_kv_and_ref(id=ann.getId(),
                                         namespace=ann.getNs(),
                                         value=Map(
-                                        m=[M(k=_key, value=str(_value))
-                                           for _key, _value in
-                                           ann.getMapValueAsMap().items()]))
+                                        m=mmap))
             if kv not in ome.structured_annotations:
                 ome.structured_annotations.append(kv)
             ds.annotation_ref.append(ref)
@@ -332,12 +339,16 @@ def populate_project(obj, ome, conn):
                 ome.structured_annotations.append(tag)
             test_proj.annotation_ref.append(ref)
         if ann.OMERO_TYPE == MapAnnotationI:
+            mmap = [M(k=_key, value=str(_value))
+                      for _key, _value in
+                      ann.getMapValueAsMap().items()]
+            for m in mmap:
+                if m.value == '':
+                    m.value = ' '
             kv, ref = create_kv_and_ref(id=ann.getId(),
                                         namespace=ann.getNs(),
                                         value=Map(
-                                        m=[M(k=_key, value=str(_value))
-                                           for _key, _value in
-                                           ann.getMapValueAsMap().items()]))
+                                        m=mmap))
             if kv not in ome.structured_annotations:
                 ome.structured_annotations.append(kv)
             test_proj.annotation_ref.append(ref)
