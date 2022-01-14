@@ -1,5 +1,7 @@
 import ezomero
 import argparse
+from omero.model import DatasetI
+from omero.gateway import DatasetWrapper
 from ome_types import from_xml
 from ome_types.model import TagAnnotation, MapAnnotation
 from ome_types.model import Line, Point, Rectangle, Ellipse, Polygon, Polyline
@@ -16,9 +18,18 @@ def create_projects(pjs, conn):
 
 
 def create_datasets(dss, conn):
+    """
+    Currently doing it the non-ezomero way because ezomero always 
+    puts "orphan" Datasets in the user's default group
+    """
     ds_map = {}
     for ds in dss:
-        ds_id = ezomero.post_dataset(conn, ds.name, ds.description)
+        dataset = DatasetWrapper(conn, DatasetI())
+        dataset.setName(ds.name)
+        if ds.description is not None:
+            dataset.setDescription(ds.description)
+        dataset.save()
+        ds_id = dataset.getId()
         ds_map[ds.id] = ds_id
     return ds_map
 
