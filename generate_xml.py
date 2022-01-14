@@ -67,6 +67,10 @@ def create_roi_and_ref(**kwargs):
 def create_point(shape):
     args = {'id': shape.getId().val, 'x': shape.getX().val,
             'y': shape.getY().val}
+    args['text'] = ''
+    args['the_c'] = 0
+    args['the_z'] = 0
+    args['the_t'] = 0
     if shape.getTextValue() is not None:
         args['text'] = shape.getTextValue().val
     if shape.getTheC() is not None:
@@ -89,6 +93,10 @@ def create_line(shape):
     args = {'id': shape.getId().val, 'x1': shape.getX1().val,
             'y1': shape.getY1().val, 'x2': shape.getX2().val,
             'y2': shape.getY2().val}
+    args['text'] = ''
+    args['the_c'] = 0
+    args['the_z'] = 0
+    args['the_t'] = 0
     if shape.getTextValue() is not None:
         args['text'] = shape.getTextValue().val
     if shape.getTheC() is not None:
@@ -111,6 +119,10 @@ def create_rectangle(shape):
     args = {'id': shape.getId().val, 'x': shape.getX().val,
             'y': shape.getY().val, 'height': shape.getHeight().val,
             'width': shape.getWidth().val}
+    args['text'] = ''
+    args['the_c'] = 0
+    args['the_z'] = 0
+    args['the_t'] = 0
     if shape.getTextValue() is not None:
         args['text'] = shape.getTextValue().val
     if shape.getTheC() is not None:
@@ -133,6 +145,10 @@ def create_ellipse(shape):
     args = {'id': shape.getId().val, 'x': shape.getX().val,
             'y': shape.getY().val, 'radius_x': shape.getRadiusX().val,
             'radius_y': shape.getRadiusY().val}
+    args['text'] = ''
+    args['the_c'] = 0
+    args['the_z'] = 0
+    args['the_t'] = 0
     if shape.getTextValue() is not None:
         args['text'] = shape.getTextValue().val
     if shape.getTheC() is not None:
@@ -153,6 +169,10 @@ def create_ellipse(shape):
 
 def create_polygon(shape):
     args = {'id': shape.getId().val, 'points': shape.getPoints().val}
+    args['text'] = ''
+    args['the_c'] = 0
+    args['the_z'] = 0
+    args['the_t'] = 0
     if shape.getTextValue() is not None:
         args['text'] = shape.getTextValue().val
     if shape.getTheC() is not None:
