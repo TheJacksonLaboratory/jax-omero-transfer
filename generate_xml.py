@@ -262,12 +262,14 @@ def populate_image(obj, ome, conn):
                 ome.structured_annotations.append(tag)
             img.annotation_ref.append(ref)
         if ann.OMERO_TYPE == MapAnnotationI:
+            mmap = [M(k=_key, value=str(_value))
+                      for _key, _value in
+                      ann.getMapValueAsMap().items()]
+            print(mmap[0])
             kv, ref = create_kv_and_ref(id=ann.getId(),
                                         namespace=ann.getNs(),
                                         value=Map(
-                                        m=[M(k=_key, value=str(_value))
-                                           for _key, _value in
-                                           ann.getMapValueAsMap().items()]))
+                                        m=mmap))
             if kv not in ome.structured_annotations:
                 ome.structured_annotations.append(kv)
             img.annotation_ref.append(ref)
