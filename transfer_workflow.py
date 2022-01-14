@@ -113,10 +113,6 @@ def copy_files(filelist, config):
     dest_group = config['dest_server']['group']
     dest_dir = config['dest_server']['data_directory']
     source_host = config['source_omero']['hostname']
-    data_user_uid = pwd.getpwnam(dest_user).pw_uid
-    data_user_gid = grp.getgrnam(dest_group).gr_gid
-    print(data_user_uid, data_user_gid)
-    data_user_home = f"/home/{dest_user}"
     #os.makedirs(dest_dir, mode=DIR_PERM, exist_ok=True)
     mkdircmd = ['sudo', '-u', dest_user, 'mkdir', '-m', str(DIR_PERM), '-p', dest_dir]
     process = subprocess.Popen(mkdircmd,

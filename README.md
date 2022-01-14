@@ -10,6 +10,8 @@ This is a prototype Python project to transfer _something_ between two OMERO ser
 - Imports the files destination-side as orphans;
 - Uses the generated XML to reproduce the links that existed originally.
 
+This is a VERY limited tool right now - we would love to have more people contributing to it, be it through suggestions/issues but, most importantly, with PRs!
+
 ## Requirements
 
 You need to have the python packages in `requirements.txt` installed, plus `rsync` installed at system level.
@@ -32,6 +34,7 @@ You need to pass a config file to `transfer_workflow.py`. We provide an example 
 
 - Starting with the obvious: **this is a prototype, it is in development, and it has no warranties**. Use at your own risk. This has a lot of moving parts, interacting with multiple machines both at OMERO and filesystem level. It can break in thousands of different ways, and there is no easy way to thoroughly test it. We do not recommend using this if you are not proficient with Python, and a seasoned OMERO veteran. 
 - We do not know how to deal with Plates and Screens right now. Sorry.
+- We are also not dealing with images without underlying files right now (i.e. created using `Pixels`). 
 - ROIs are limited to `ezomero.rois` types (Point, Ellipse, Rectangle, Line, Polygon). All other ROIs will be skipped.
 - We assume Bioformats generates Image IDs in the same order for the same files (which is relevant for multi-series file formats).
 - OMERO does some strange setting with channel = -1 for ROIs sometimes (for RGB images, I think).  `ome-types` hates that, so we set those values to 0.
