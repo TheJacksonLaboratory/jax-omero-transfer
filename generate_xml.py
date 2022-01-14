@@ -352,6 +352,7 @@ def populate_xml(datatype, id, filepath, conn):
         populate_dataset(obj, ome, conn)
     if datatype == 'Image':
         populate_image(obj, ome, conn)
+    print(ome)
     with open(filepath, 'w') as fp:
         print(to_xml(ome), file=fp)
         fp.close()
