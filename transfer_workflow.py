@@ -172,7 +172,8 @@ def import_files(filelist, destconn, config):
         dest_path = os.path.join(dest_dir, rel_path)
         if ln_s:
             omero_user = config['general']['omero_user']
-            import_cmd = ['sudo', '-u', omero_user, 'omero', 'import', 
+            omero_path = config['general']['omero_path']
+            import_cmd = ['sudo', '-u', omero_user, omero_path, 'import', 
                           '-k', session, '-s', host, '-p', str(port),
                           '--transfer', 'ln_s', str(dest_path)]
         else:
