@@ -28,7 +28,7 @@ You need to pass a config file to `transfer_workflow.py`. We provide an example 
 2) [dest_omero]: `hostname, port, group, user, password, secure` are all options for your connection to the OMERO server (`password` is optional - if you do not want to store it in plain text on the config file **(and you shouldn't)**, it will prompt you for a password when running it).
 3) [source_server]: `user` and `hostname` will be used to connect to the source server at filesystem-level to transfer files (note that storing THIS password in clear text here is not an option). `managedrepo_dir` is the full path to the `ManagedRepository` directory in this server, where we will find the original imported files.
 4) [data_storage]: `user` and `group` are the **local** users that will be used to store the data **locally**, and `data_directory` is where you are going to put the original image files locally. 
-5) [general]: `xml_filepath` is the path where you are going to store the XML describing all links between objects. `ln_s_import` is whether you want to import files using the `ln_s` option for in-place importing. Note that this option only works if you are running this on the destination server!
+5) [general]: `xml_filepath` is the path where you are going to store the XML describing all links between objects. `ln_s_import` is whether you want to import files using the `ln_s` option for in-place importing. Note that this option only works if you are running this on the destination server! In the case of `ln_s_import` being set to `yes`, you also need to provide `omero_user`, a user with access to the `ManagedRepository` that will run the imports, and `omero_path`, the path to a `omero` binary that `omero_user` can use.
 
 ## Caveats, warnings, limitations
 
