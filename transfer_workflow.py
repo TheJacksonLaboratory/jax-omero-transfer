@@ -171,8 +171,9 @@ def import_files(filelist, destconn, config):
         rel_path = file.split(managed_repo)[-1][1:]
         dest_path = os.path.join(dest_dir, rel_path)
         if ln_s:
-            import_cmd = ['omero', 'import', '-k', session, '-s',
-                          host, '-p', str(port),
+            omero_user = config['general']['omero_user']
+            import_cmd = ['sudo', '-u', omero_user, 'omero', 'import', 
+                          '-k', session, '-s', host, '-p', str(port),
                           '--transfer', 'ln_s', str(dest_path)]
         else:
             import_cmd = ['omero', 'import', '-k', session, '-s',
