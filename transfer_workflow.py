@@ -109,9 +109,9 @@ def list_source_files(config, conn):
 
 def copy_files(filelist, config):
     source_user = config['source_server']['user']
-    dest_user = config['dest_server']['user']
-    dest_group = config['dest_server']['group']
-    dest_dir = config['dest_server']['data_directory']
+    dest_user = config['data_storage']['user']
+    dest_group = config['data_storage']['group']
+    dest_dir = config['data_storage']['data_directory']
     source_host = config['source_omero']['hostname']
     #os.makedirs(dest_dir, mode=DIR_PERM, exist_ok=True)
     mkdircmd = ['sudo', '-u', dest_user, 'mkdir', '-m', str(DIR_PERM), '-p', dest_dir]
@@ -119,8 +119,9 @@ def copy_files(filelist, config):
                                stdout=sys.stdout,
                                stderr=sys.stderr
                                )
-    copycmd = ['sudo', '-u', dest_user, 'rsync', '-Rvh', '--progress',
-               source_user+"@"+source_host+":"+" ".join(filelist),
+    space_filelist = [s.replace(" ", "\ ") for s in filelist]
+    copycmd = ['sudo', '-u', dest_user, 'rsync', '-RvhL', '--progress',
+               source_user+"@"+source_host+":"+" ".join(space_filelist),
                dest_dir+"/"]
     process = subprocess.Popen(copycmd,
                                stdout=sys.stdout,
@@ -162,7 +163,7 @@ def import_files(filelist, destconn, config):
     ln_s = config['general'].getboolean('ln_s_import', False)
     host = config['dest_omero']['hostname']
     port = int(config['dest_omero']['port'])
-    dest_dir = config['dest_server']['data_directory']
+    dest_dir = config['data_storage']['data_directory']
     managed_repo = config['source_server']['managedrepo_dir']
     session = destconn.getSession().getUuid().val
     dest_map = {}

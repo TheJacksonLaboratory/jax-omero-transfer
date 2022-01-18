@@ -77,6 +77,7 @@ def create_shapes(roi):
         elif isinstance(shape, Polygon) or isinstance(shape, Polyline):
             points = []
             for pt in shape.points.split(" "):
+                # points sometimes come with a comma at the end...
                 pt = pt.rstrip(",")
                 points.append(tuple(float(x) for x in pt.split(",")))
             sh = rois.Polygon(points, z=shape.the_z, c=shape.the_c,
